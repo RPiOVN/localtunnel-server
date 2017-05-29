@@ -46,11 +46,14 @@ function maybe_bounce(req, res, sock, head) {
     if (!hostname) {
         return false;
     }
+    console.log("Hostname: " + hostname);
 
-    const subdomain = tldjs.getSubdomain(hostname);
-    if (!subdomain) {
+    let subdomain = tldjs.getSubdomain(hostname);
+    if (!subdomain || subdomain === 'office') {
         return false;
     }
+
+    subdomain = subdomain.split('.office')[0];
 
     const client = clients[subdomain];
 
