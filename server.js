@@ -49,11 +49,11 @@ function maybe_bounce(req, res, sock, head) {
     console.log("Hostname: " + hostname);
 
     let subdomain = tldjs.getSubdomain(hostname);
-    if (!subdomain || subdomain === 'office') {
+    if (!subdomain || subdomain === 'device') {
         return false;
     }
 
-    subdomain = subdomain.split('.office')[0];
+    subdomain = subdomain.split('.device')[0];
 
     const client = clients[subdomain];
 
