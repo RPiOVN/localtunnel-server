@@ -269,6 +269,7 @@ module.exports = function(opt) {
         res.json({
             tunnels: stats.tunnels,
             mem: process.memoryUsage(),
+            client: clients
         });
     });
 
