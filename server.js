@@ -122,14 +122,16 @@ function maybe_bounce(req, res, sock, head) {
         // we just tell the user no resource available to service request
         else if (!socket) {
             if (res) {
+                let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
                 let toSlack = {
                     message: '504 was here',
                     useragent: {
                         os:  req.useragent.os,
                         browser: req.useragent.browser,
+                        ip: ip
                     }
                 };
-                webhook.send(toSlack, function(err, header, statusCode, body) {
+                webhook.send(JSON.stringify(toSlack), function(err, header, statusCode, body) {
                     if (err) {
                         console.log('Error:', err);
                     } else {
