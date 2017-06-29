@@ -7,6 +7,8 @@ import http_proxy from 'http-proxy';
 import http from 'http';
 import Promise from 'bluebird';
 
+var useragent = require('express-useragent');
+
 import Proxy from './proxy';
 import rand_id from './lib/rand_id';
 import BindingAgent from './lib/BindingAgent';
@@ -120,7 +122,14 @@ function maybe_bounce(req, res, sock, head) {
         // we just tell the user no resource available to service request
         else if (!socket) {
             if (res) {
-                webhook.send('Hello 504 here!', function(err, header, statusCode, body) {
+                let toSlack = {
+                    message: '504 was here',
+                    useragent: {
+                        os:  req.useragent.os,
+                        browser: req.useragent.browser,
+                    }
+                };
+                webhook.send(toSlack, function(err, header, statusCode, body) {
                     if (err) {
                         console.log('Error:', err);
                     } else {
@@ -247,6 +256,8 @@ module.exports = function(opt) {
     const schema = opt.secure ? 'https' : 'http';
 
     const app = express();
+
+    app.use(useragent.express());
 
     app.get('/', function(req, res, next) {
         if (req.query['new'] === undefined) {
