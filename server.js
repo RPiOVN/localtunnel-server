@@ -38,6 +38,14 @@ const stats = {
     tunnels: 0
 };
 
+//SLACK integration
+let IncomingWebhook = require('@slack/client').IncomingWebhook;
+
+let url = 'https://hooks.slack.com/services/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';
+
+let webhook = new IncomingWebhook(url);
+
+
 // handle proxying a request to a client
 // will wait for a tunnel socket to become available
 function maybe_bounce(req, res, sock, head) {
@@ -112,6 +120,14 @@ function maybe_bounce(req, res, sock, head) {
         // we just tell the user no resource available to service request
         else if (!socket) {
             if (res) {
+                webhook.send('Hello 504 here!', function(err, header, statusCode, body) {
+                    if (err) {
+                        console.log('Error:', err);
+                    } else {
+                        console.log('Received', statusCode, 'from Slack');
+                    }
+                });
+
                 res.statusCode = 504;
                 res.end();
             }
