@@ -54,12 +54,14 @@ function maybe_bounce(req, res, sock, head) {
     // without a hostname, we won't know who the request is for
     const hostname = req.headers.host;
     if (!hostname) {
+        console.log('no hostname, line 57');
         return false;
     }
     console.log("Hostname: " + hostname);
 
     let subdomain = tldjs.getSubdomain(hostname);
     if (!subdomain || subdomain === 'device') {
+        console.log('no subdomain, line 64');
         return false;
     }
 
@@ -71,11 +73,13 @@ function maybe_bounce(req, res, sock, head) {
     // we use 502 error to the client to signify we can't service the request
     if (!client) {
         if (res) {
+            console.log('no client, yes res, line 76');
             res.statusCode = 502;
             res.end(`no active client for '${subdomain}'`);
             req.connection.destroy();
         }
         else if (sock) {
+            console.log('no client-res, yes sock, line 82');
             sock.destroy();
         }
 
@@ -84,11 +88,13 @@ function maybe_bounce(req, res, sock, head) {
 
     let finished = false;
     if (sock) {
+        console.log('yes sock, line 91');
         sock.once('end', function() {
             finished = true;
         });
     }
     else if (res) {
+        console.log('yes res, line 97');
         // flag if we already finished before we get a socket
         // we can't respond to these requests
         on_finished(res, function(err) {
@@ -98,6 +104,7 @@ function maybe_bounce(req, res, sock, head) {
     }
     // not something we are expecting, need a sock or a res
     else {
+        console.log('no res-sock, line 107');
         req.connection.destroy();
         return true;
     }
@@ -108,6 +115,7 @@ function maybe_bounce(req, res, sock, head) {
     client.next_socket(async (socket) => {
         // the request already finished or client disconnected
         if (finished) {
+            console.log('finished, line 118');
             return;
         }
 
@@ -122,6 +130,7 @@ function maybe_bounce(req, res, sock, head) {
         // we just tell the user no resource available to service request
         else if (!socket) {
             if (res) {
+                console.log('no socket, yes res, line 133');
                 let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
                 let toSlack = {
                     message: '504 was here',
@@ -144,6 +153,7 @@ function maybe_bounce(req, res, sock, head) {
             }
 
             if (sock) {
+                console.log('no socket, yes sock, line 156');
                 sock.destroy();
             }
 
@@ -155,6 +165,8 @@ function maybe_bounce(req, res, sock, head) {
         // and directly pipe the socket data
         // avoids having to rebuild the request and handle upgrades via the http client
         if (res === null) {
+            console.log('no res, line 168');
+
             const arr = [`${req.method} ${req.url} HTTP/${req.httpVersion}`];
             for (let i=0 ; i < (req.rawHeaders.length-1) ; i+=2) {
                 arr.push(`${req.rawHeaders[i]}: ${req.rawHeaders[i+1]}`);
