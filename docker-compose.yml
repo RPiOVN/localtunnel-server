@@ -1,0 +1,12 @@
+   
+localtunnel-server:
+  build: .
+  dockerfile: Dockerfile
+  ports:
+    - "3001:3000"
+#  links:
+#    - localtunnel-nginx
+#  volumes:
+#    - ./ssl:/etc/nginx/ssl
+#  restart: always
+    
